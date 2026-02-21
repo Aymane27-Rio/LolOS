@@ -27,3 +27,9 @@ jobs:
           echo "Build failed: myos.bin was not created."
           exit 1
         fi
+    - name: Upload OS Binary Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LolOs-Binary
+        path: myos.bin
+        retention-days: 7
