@@ -1,0 +1,8 @@
+# compiled object files
+*.o
+# executables & disk images
+*.bin
+*.iso
+*.img
+# QEMU debug logs (idk if this is the correct extension, but it should be)
+*.log

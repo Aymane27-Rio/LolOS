@@ -1,0 +1,29 @@
+name: OS Build Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      # gcc-multilib is needed to compile 32-bit code on a 64-bit runner
+      run: sudo apt-get update && sudo apt-get install -y nasm gcc-multilib
+
+    - name: Build OS
+      run: make
+
+    - name: Verify Binary Exists
+      run: |
+        if [ ! -f myos.bin ]; then
+          echo "Build failed: myos.bin was not created."
+          exit 1
+        fi
