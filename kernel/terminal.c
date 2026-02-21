@@ -1,0 +1,70 @@
+#include <stdint.h>
+#include "../include/io.h"
+#include "../include/terminal.h"
+#include "../include/string.h"
+
+int cursor_x = 0;
+int cursor_y = 0;
+volatile uint16_t* vga_buffer = (uint16_t*)0xB8000;
+
+void update_cursor(int x, int y) {
+    uint16_t pos = y * 80 + x; 
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint8_t)(pos & 0xFF));
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+}
+
+void scroll() {
+    for (int y = 0; y < 24; y++) {
+        for (int x = 0; x < 80; x++) {
+            vga_buffer[y * 80 + x] = vga_buffer[(y + 1) * 80 + x];
+        }
+    }
+    uint16_t blank = (uint16_t)' ' | (uint16_t)0x0F00;
+    memsetw((uint16_t*)(vga_buffer + 24 * 80), blank, 80);
+    cursor_y = 24;
+}
+
+void terminal_clear() {
+    uint16_t blank = (uint16_t)' ' | (uint16_t)0x0F00;
+    memsetw((uint16_t*)vga_buffer, blank, 2000);
+    cursor_x = 0;
+    cursor_y = 0;
+    update_cursor(0, 0);
+}
+
+void terminal_init() {
+    terminal_clear();
+    print_string("LolOs CLI v0.2\n> ");
+}
+
+void print_char(char c) {
+    if (c == '\n') {
+        cursor_x = 0;
+        cursor_y++;
+    } else if (c == '\b') {
+        if (cursor_x > 0) {
+            cursor_x--;
+            vga_buffer[cursor_y * 80 + cursor_x] = (uint16_t)' ' | (uint16_t)0x0F00;
+        }
+    } else {
+        vga_buffer[cursor_y * 80 + cursor_x] = (uint16_t)c | (uint16_t)0x0F00;
+        cursor_x++;
+    }
+
+    if (cursor_x >= 80) {
+        cursor_x = 0;
+        cursor_y++;
+    }
+    if (cursor_y >= 25) {
+        scroll();
+    }
+    update_cursor(cursor_x, cursor_y);
+}
+
+void print_string(const char* str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        print_char(str[i]);
+    }
+}
