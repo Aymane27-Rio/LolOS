@@ -1,6 +1,6 @@
 # LolOS 💻
 
-A custom, bare-metal 32-bit operating system built from scratch, currently featuring a bootable VGA text-mode terminal.
+A custom, bare-metal 32-bit operating system built from scratch.
 
 ## Features
 * Multiboot compliant
@@ -21,7 +21,7 @@ Clone the repository and use the included Makefile:
    ```bash
    make run
    ```
-2. Clean up build artifacts:
+2. Clean up build artifacts after finishing up:
    ```bash
    make clean
    ```

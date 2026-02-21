@@ -5,10 +5,13 @@ LD = ld
 CFLAGS = -m32 -ffreestanding -c
 LDFLAGS = -m elf_i386 -T linker.ld
 
+
+OBJS = boot/boot.o kernel/kernel.o kernel/keyboard.o
+
 all: myos.bin
 
-myos.bin: boot/boot.o kernel/kernel.o
-	$(LD) $(LDFLAGS) boot/boot.o kernel/kernel.o -o myos.bin
+myos.bin: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) -o myos.bin
 
 boot/%.o: boot/%.s
 	$(AS) -f elf32 $< -o $@
@@ -20,4 +23,4 @@ clean:
 	rm -f boot/*.o kernel/*.o *.bin
 
 run: myos.bin
-	qemu-system-i386 -kernel myos.bin -display curses
+	qemu-system-i386 -kernel myos.bin -display gtk
