@@ -6,7 +6,7 @@ CFLAGS = -m32 -ffreestanding -c
 LDFLAGS = -m elf_i386 -T linker.ld
 
 
-OBJS = boot/boot.o kernel/kernel.o kernel/keyboard.o kernel/terminal.o kernel/string.o
+OBJS = boot/boot.o kernel/kernel.o kernel/keyboard.o kernel/terminal.o kernel/string.o kernel/cmos.o
 
 all: myos.bin
 

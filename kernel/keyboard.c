@@ -9,12 +9,23 @@ const char kbd_map[128] = {
 };
 
 uint8_t last_scancode = 0;
+int is_extended = 0;
 
 char get_keypress() {
-    // letting the hardware know we want to read the keyboard data
-    while ((inb(0x64) & 1) == 0); 
+    if ((inb(0x64) & 1) == 0) {
+        return 0; // no key pressed, encountered deadlocking issues
+    }
     uint8_t scancode = inb(0x60);
-    
+    if (scancode == 0xE0){
+        is_extended = 1;
+        return 0;
+    }
+    if (is_extended){
+        is_extended = 0;
+        if (scancode == 0x48) return 17; // up arrow
+        if (scancode == 0x50) return 18; // down arrow
+        return 0;
+    }
     // omiting duplicate signals to prevent the repeating glitch that i noticed when holding down a key
     if (scancode == last_scancode) {
         return 0;

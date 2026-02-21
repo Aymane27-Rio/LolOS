@@ -10,11 +10,18 @@ align 4
     dd FLAGS
     dd CHECKSUM
 
+section .bss
+align 16
+stack_bottom:
+    resb 16384 ; Reserve 16 Kilobytes of memory for our stack
+stack_top:
+
 section .text
 global _start
 extern kmain
 
 _start:
     cli             ; disable interrupts
+    mov esp, stack_top ; set the cpu's stack pointer to the new memory
     call kmain      ; jump to the C code
     hlt             ; halt the CPU if the C code finishes
