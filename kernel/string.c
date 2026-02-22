@@ -46,3 +46,13 @@ uint16_t* memsetw(uint16_t* dest, uint16_t val, size_t count) {
     }
     return dest;
 }
+
+//ascii to integer
+
+int atoi(const char* str){
+    int result =0;
+    for (int i = 0; str[i]!= '\0' && str[i] >= '0' && str[i] <= '9'; i++){
+        result = result * 10 + (str[i] - '0');
+    }
+    return result;
+}

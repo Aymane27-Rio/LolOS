@@ -12,5 +12,6 @@ char* strcpy(char* dest, const char* src);
 // for memory (ew)
 void* memset(void* ptr, int value, size_t num);
 uint16_t* memsetw(uint16_t* dest, uint16_t val, size_t count);
+int atoi(const char* str);
 
 #endif
