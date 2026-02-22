@@ -4,6 +4,7 @@
 #include "../include/string.h"
 #include "../include/cmos.h"
 #include "../include/shell.h"
+#include "../include/cpu.h"
 
 // keyboard driver
 char get_keypress();
@@ -54,7 +55,7 @@ void start_shell() {
                     }
                     // commands
                     if (strcmp(command_buffer, "help") == 0){
-                        print_string("Commands: help, clear, echo, theme, time, date, sleep, reboot, shutdown\n");
+                        print_string("Commands: help, clear, echo, theme, time, date, sleep, sysinfo, reboot, shutdown\n");
                     } 
                     else if (strcmp(command_buffer, "clear") == 0) {
                         terminal_clear();
@@ -104,6 +105,14 @@ void start_shell() {
                         else if (strcmp(args, "red") == 0) terminal_apply_theme(0x0C);
                         else if (strcmp(args, "default") == 0) terminal_apply_theme(0x0F);
                         else print_string("Unknown theme. Try: green, blue, red, default\n");
+                    }
+                    else if (strcmp(command_buffer, "sysinfo") == 0) {
+                        char vendor[13];
+                        get_cpu_vendor(vendor);
+                        print_string("OS: LolOs v0.3 (32-bit x86)\n");
+                        print_string("CPU Vendor: ");
+                        print_string(vendor);
+                        print_char('\n');
                     }
                     else {
                         print_string("Unknown command: ");
