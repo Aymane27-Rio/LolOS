@@ -2,11 +2,18 @@
 
 A custom, bare-metal 32-bit operating system built from scratch.
 
+## Overview
+LolOS is a lightweight, monolithic testbed operating system operating in 32-bit Protected Mode. It features custom hardware drivers, a modular interactive shell, and direct hardware-to-memory communication without relying on standard C libraries or underlying host OS functions.
+
 ## Features
-* Multiboot compliant
-* Custom VGA text driver
-* Automated CI/CD build pipeline
-* (Coming soon: Keyboard input and a basic shell!)
+* **Core Architecture:** Multiboot compliant with a custom 32-bit bootloader and dedicated stack.
+* **VGA Graphics:** Custom text-mode driver with dynamic, persistent screen theming.
+* **Input/Output:** Non-blocking PS/2 keyboard driver utilizing raw CPU port mapping.
+* **Interactive Shell:** Modular Ring 0 user environment featuring a ring-buffer command history (Up/Down arrow navigation).
+* **Hardware Interfacing:** * Direct CMOS Real-Time Clock (RTC) querying for live time/date.
+  * Inline Assembly execution (CPUID) for physical processor identification.
+* **Persistent Storage:** ATA PIO block device driver capable of reading/writing raw 512-byte sectors to a virtual hard drive.
+* **DevOps:** Automated CI/CD pipeline enforcing strict GCC compilation standards (`-Werror`).
 
 ## Prerequisites
 To build and run LolOs locally, you need the following installed on a Linux environment (Ubuntu recommended):
@@ -14,14 +21,23 @@ To build and run LolOs locally, you need the following installed on a Linux envi
 * `nasm` (Assembler)
 * `qemu-system-x86` (Emulator for testing)
 
-## Build and Run
+## Build and Run (for devs and contributing)
 Clone the repository and use the included Makefile:
 
 1. Compile the OS and launch it in QEMU:
    ```bash
    make run
    ```
-2. Clean up build artifacts after finishing up:
+2. Clean up build artifacts after finishing up (Note: `disk.img` will be deleted, wiping virtual disk data) :
    ```bash
    make clean
+   ```
+
+## Or if you're just curious (no compilation whatsoever required)
+1. Go to the **Actions** tab at the top of this GitHub repository.
+2. Click on the latest successful workflow run.
+3. Scroll down to the **Artifacts** section and download the `.zip` file containing `myos.bin`.
+4. Extract the file and boot it using QEMU:
+   ```bash
+   qemu-system-i386 -kernel myos.bin
    ```

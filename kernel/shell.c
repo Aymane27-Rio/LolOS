@@ -5,6 +5,7 @@
 #include "../include/cmos.h"
 #include "../include/shell.h"
 #include "../include/cpu.h"
+#include "../include/ata.h"
 
 // keyboard driver
 char get_keypress();
@@ -55,7 +56,7 @@ void start_shell() {
                     }
                     // commands
                     if (strcmp(command_buffer, "help") == 0){
-                        print_string("Commands: help, clear, echo, theme, time, date, sleep, sysinfo, reboot, shutdown\n");
+                        print_string("Commands: help, clear, echo, theme, time, date, sleep, sysinfo, reboot, shutdown, disktest\n");
                     } 
                     else if (strcmp(command_buffer, "clear") == 0) {
                         terminal_clear();
@@ -112,6 +113,21 @@ void start_shell() {
                         print_string("OS: LolOs v0.3 (32-bit x86)\n");
                         print_string("CPU Vendor: ");
                         print_string(vendor);
+                        print_char('\n');
+                    }
+                    else if (strcmp(command_buffer, "disktest") == 0){
+                        uint8_t write_buf[512];
+                        uint8_t read_buf[512];
+                        //clear the buffers first
+                        memset(write_buf, 0, 512);
+                        memset(read_buf, 0, 512);
+                        //test data to write buffer
+                        strcpy((char*)write_buf, "LolOs hard drive is working");
+                        print_string("Writing to disk\n");
+                        ata_write_sector(1, write_buf); // write to LBA 1
+                        print_string("Reading from disk\n");
+                        ata_read_sector(1, read_buf); //read from LBA 1
+                        print_string((char*)read_buf);
                         print_char('\n');
                     }
                     else {
