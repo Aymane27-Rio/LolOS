@@ -21,27 +21,28 @@ void terminal_apply_theme(uint8_t color){
     if (color == 0x0A) term_color = 0x0000FF00;   
     else if (color == 0x09) term_color = 0x000088FF; 
     else if (color == 0x0C) term_color = 0x00FF0000; 
-    else term_color = 0x00FFFFFF;                    
+    else term_color = 0x00FFFFFF;  
+    terminal_clear();                  
 }
 
 
 void print_char(char c) {
     if (c == '\n') {
         cursor_x = 0;
-        cursor_y += 8;
+        cursor_y += 16;
     } else if (c == '\b') {
-        if (cursor_x >= 8) {
-            cursor_x -= 8;
-            draw_rect(cursor_x, cursor_y, 8, 8, bg_color);
+        if (cursor_x >= 16) {
+            cursor_x -= 16;
+            draw_rect(cursor_x, cursor_y, 16, 16, bg_color);
         }
     } else {
         draw_char(c, cursor_x, cursor_y, term_color);
-        cursor_x += 8;
+        cursor_x += 16;
     }
 
     if (cursor_x >= 800) {
         cursor_x = 0;
-        cursor_y += 8;
+        cursor_y += 16;
     }
     if (cursor_y >= 600) {
         terminal_clear();

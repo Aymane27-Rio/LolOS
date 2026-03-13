@@ -7,6 +7,8 @@
 #include "../include/cpu.h"
 #include "../include/ata.h"
 #include "../include/fs.h"
+#include "../include/mouse.h"
+#include "../include/graphics.h"
 
 // keyboard driver
 char get_keypress();
@@ -34,7 +36,18 @@ void sleep(int seconds) {
 // the main shell loop
 void start_shell() {
     fs_init(); // booting the FS
+    int32_t old_mx = mouse_x;
+    int32_t old_my = mouse_y;
+    draw_cursor(mouse_x, mouse_y);
     while (1) {
+        if (handle_mouse_packet()) {
+            if (mouse_x != old_mx || mouse_y != old_my) {
+                restore_cursor_bg(old_mx, old_my);
+                draw_cursor(mouse_x, mouse_y);
+                old_mx = mouse_x;
+                old_my = mouse_y;
+            }
+        }
         char key = get_keypress();
         if (key != 0){
             
@@ -116,7 +129,7 @@ void start_shell() {
                     else if (strcmp(command_buffer, "sysinfo") == 0) {
                         char vendor[13];
                         get_cpu_vendor(vendor);
-                        print_string("OS: LolOs v0.3 (32-bit x86)\n");
+                        print_string("OS: LolOs v1.0 (32-bit x86)\n");
                         print_string("CPU Vendor: ");
                         print_string(vendor);
                         print_char('\n');

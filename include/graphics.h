@@ -9,5 +9,8 @@ void draw_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color);
 void draw_char(char c, uint32_t x, uint32_t y, uint32_t color);
 void draw_string(const char* str, uint32_t x, uint32_t y, uint32_t color);
 void draw_icon(uint32_t x, uint32_t y, uint32_t color);
+void save_cursor_bg(uint32_t x, uint32_t y);
+void restore_cursor_bg(uint32_t x, uint32_t y);
+void draw_cursor(uint32_t x, uint32_t y);
 
 #endif

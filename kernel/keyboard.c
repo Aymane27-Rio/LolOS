@@ -12,10 +12,13 @@ uint8_t last_scancode = 0;
 int is_extended = 0;
 
 char get_keypress() {
-    if ((inb(0x64) & 1) == 0) {
-        return 0; // no key pressed, encountered deadlocking issues
-    }
-    uint8_t scancode = inb(0x60);
+    uint8_t status = inb(0x64);
+    if (status & 1) {
+        if (status & 0x20) {
+            // inb(0x60); // read it just to clear the hardware buffer
+            return 0;  // do not type anything, please
+        }
+        uint8_t scancode = inb(0x60);
     if (scancode == 0xE0){
         is_extended = 1;
         return 0;
@@ -31,10 +34,12 @@ char get_keypress() {
         return 0;
     }
     last_scancode = scancode;
-
     // only return valid key-down events and ignore key releases/unknowns
     if (scancode < 128) {
         return kbd_map[scancode];
     }
-    return 0; 
+    
+     
+    }
+    return 0;
 }

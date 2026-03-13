@@ -35,11 +35,12 @@ void draw_char(char c, uint32_t x, uint32_t y, uint32_t color) {
     // only draw printable ASCII characters for now
     if (uc < 32 || uc > 127) return; 
     uint8_t* glyph = font8x8[uc];
+    int scale = 2; //better visibility on 800x600, feel free to change it back to 1 for a sharper look
     for (int cy = 0; cy < 8; cy++) {
         for (int cx = 0; cx < 8; cx++) {
             // checking if the specific bit is set to 1
             if (glyph[cy] & (0x80 >> cx)) {
-                put_pixel(x + cx, y + cy, color);
+                draw_rect(x + (cx * scale), y + (cy * scale), scale, scale, color);            
             }
         }
     }
@@ -49,7 +50,7 @@ void draw_string(const char* str, uint32_t x, uint32_t y, uint32_t color) {
     int current_x = x;
     for (int i = 0; str[i] != '\0'; i++) {
         draw_char(str[i], current_x, y, color);
-        current_x += 8; // move 8 pixels to the right for the next letter
+        current_x += 16; // move 16 pixels to the right for the next letter
     }
 }
 
@@ -77,6 +78,63 @@ void draw_icon(uint32_t x, uint32_t y, uint32_t color) {
         for (int cx = 0; cx < 16; cx++) {
             if (sys_icon[cy] & (0x8000 >> cx)) {
                 put_pixel(x + cx, y + cy, color);
+            }
+        }
+    }
+}
+
+uint32_t cursor_bg[256];
+
+uint16_t mouse_arrow[16] = {
+    0b1000000000000000,
+    0b1100000000000000,
+    0b1110000000000000,
+    0b1111000000000000,
+    0b1111100000000000,
+    0b1111110000000000,
+    0b1111111000000000,
+    0b1111111100000000,
+    0b1111111110000000,
+    0b1111111111000000,
+    0b1111111000000000,
+    0b1110111100000000,
+    0b1100011100000000,
+    0b1000001110000000,
+    0b0000000110000000,
+    0b0000000000000000
+};
+
+
+void save_cursor_bg(uint32_t x, uint32_t y) {
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 16; j++) {
+            if (x + j < width && y + i < height) {
+                // copying raw data
+                cursor_bg[i * 16 + j] = framebuffer[(y + i) * (pitch / 4) + (x + j)];
+            }
+        }
+    }
+}
+
+void restore_cursor_bg(uint32_t x, uint32_t y) {
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 16; j++) {
+            if (x + j < width && y + i < height) {
+                // originally i wanted to use put_pixel here but since we already have the raw data, might as well copy it directly for better performance
+                put_pixel(x + j, y + i, cursor_bg[i * 16 + j]);
+            }
+        }
+    }
+}
+
+void draw_cursor(uint32_t x, uint32_t y) {
+    save_cursor_bg(x, y); 
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 16; j++) {
+            if (x + j < width && y + i < height) {
+                if (mouse_arrow[i] & (0x8000 >> j)) { 
+                    put_pixel(x + j, y + i, 0x00FFFFFF);
+                }
             }
         }
     }

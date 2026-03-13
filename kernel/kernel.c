@@ -2,6 +2,7 @@
 #include "../include/shell.h"
 #include "../include/multiboot.h"
 #include "../include/graphics.h"
+#include "../include/mouse.h"
 
 void kmain(uint32_t magic, multiboot_info_t* mbd) {
     if (magic != 0x2BADB002) {
@@ -9,14 +10,32 @@ void kmain(uint32_t magic, multiboot_info_t* mbd) {
     }
     init_graphics(mbd);
     terminal_init();
+    mouse_init();
     draw_rect(0, 0, 800, 20, 0x00333333);
     draw_icon(770, 2, 0x0000FF00);
-    extern uint32_t cursor_y;
-    cursor_y = 25;
-    print_string("LolOS Graphical Shell v1.0\n");
-    print_string("> ");
-    start_shell();
-    // draw_rect(350, 250, 100, 100, 0x00FF0000);
-    // draw_rect(100, 100, 150, 150, 0x0000FF00);
-    __asm__ volatile("cli; hlt"); //just in case
+    int32_t old_mx = mouse_x;
+    int32_t old_my = mouse_y;
+    draw_cursor(mouse_x, mouse_y);
+    while (1) {
+        if (handle_mouse_packet()) {
+            if (mouse_x != old_mx || mouse_y != old_my) {
+                restore_cursor_bg(old_mx, old_my);
+                draw_cursor(mouse_x, mouse_y);
+                old_mx = mouse_x;
+                old_my = mouse_y;
+            }
+            // did the user click the Gamepad icon?
+            if (left_click && mouse_x >= 770 && mouse_x <= 786 && mouse_y >= 2 && mouse_y <= 18) {
+                restore_cursor_bg(old_mx, old_my); 
+                extern uint32_t cursor_y; 
+                cursor_y = 25;
+                print_string("  _          _  ___  ___\n");
+                print_string(" | |    ___ | |/ _ \\/ __|\n");
+                print_string(" | |__ / _ \\| | (_) \\__ \\\n");
+                print_string(" |____|\\___/|_|\\___/|___/\n\n");
+                print_string("LolOS Graphical Shell v1.0\n> ");
+                start_shell(); 
+            }
+        }
+    }
 }
