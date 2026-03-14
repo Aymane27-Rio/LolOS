@@ -1,15 +1,27 @@
 #include "../include/io.h"
 
+int shift_pressed = 0;
 // US QWERTY layout map to convert PS/2 scancodes to ASCII characters
-const char kbd_map[128] = {
+const char kbd_us[128] = {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',   
-  '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',       
-    0,  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',   0,       
-  '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',   0, '*', 0, ' '
+  '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',   
+    0,  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',   
+    0,  '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',   0,
+  '*',  0,  ' ',  0,  0,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+    0,  0,  0,  '-',  0,  0,  0,  '+',  0,  0,  0,   0,   0,   0,   0,   0,
+    0,  0,  0,   0,   0,  0,  0,   0,   0,  0,  0,   0,   0,   0,   0,   0
 };
 
-uint8_t last_scancode = 0;
-int is_extended = 0;
+const char kbd_us_shift[128] = {
+    0,  27, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',   
+  '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',   
+    0,  'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~',   
+    0,  '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',   0,
+  '*',  0,  ' ',  0,  0,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+    0,  0,  0,  '-',  0,  0,  0,  '+',  0,  0,  0,   0,   0,   0,   0,   0,
+    0,  0,  0,   0,   0,  0,  0,   0,   0,  0,  0,   0,   0,   0,   0,   0
+};
+
 
 char get_keypress() {
     uint8_t status = inb(0x64);
@@ -19,27 +31,23 @@ char get_keypress() {
             return 0;  // do not type anything, please
         }
         uint8_t scancode = inb(0x60);
-    if (scancode == 0xE0){
-        is_extended = 1;
-        return 0;
-    }
-    if (is_extended){
-        is_extended = 0;
-        if (scancode == 0x48) return 17; // up arrow
-        if (scancode == 0x50) return 18; // down arrow
-        return 0;
-    }
-    // omiting duplicate signals to prevent the repeating glitch that i noticed when holding down a key
-    if (scancode == last_scancode) {
-        return 0;
-    }
-    last_scancode = scancode;
-    // only return valid key-down events and ignore key releases/unknowns
-    if (scancode < 128) {
-        return kbd_map[scancode];
-    }
-    
-     
+        if (scancode == 0x2A || scancode == 0x36) { 
+            shift_pressed = 1; 
+            return 0; 
+        }
+        if (scancode == 0xAA || scancode == 0xB6) { 
+            shift_pressed = 0; 
+            return 0; 
+        }
+        if (scancode & 0x80) return 0;
+        if (scancode < 128) {
+            if (shift_pressed) {
+                return kbd_us_shift[scancode];
+            } else {
+                return kbd_us[scancode];
+            }
+        }
     }
     return 0;
+    
 }

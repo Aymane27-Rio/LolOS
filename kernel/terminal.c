@@ -27,24 +27,30 @@ void terminal_apply_theme(uint8_t color){
 
 
 void print_char(char c) {
+    int char_width = 16;
+    int kerning = 2;
+    int advance_x = char_width + kerning; 
+    int char_height = 24;
+
     if (c == '\n') {
         cursor_x = 0;
-        cursor_y += 16;
-    } else if (c == '\b') {
-        if (cursor_x >= 16) {
-            cursor_x -= 16;
-            draw_rect(cursor_x, cursor_y, 16, 16, bg_color);
+        cursor_y += char_height;
+    } 
+    else if (c == '\b') {
+        if (cursor_x >= advance_x) {
+            cursor_x -= advance_x;
+            draw_rect(cursor_x, cursor_y, advance_x, char_height, bg_color); 
         }
-    } else {
+    } 
+    else {
         draw_char(c, cursor_x, cursor_y, term_color);
-        cursor_x += 16;
+        cursor_x += advance_x;
+        if (cursor_x >= 800 - advance_x) {
+            cursor_x = 0;
+            cursor_y += char_height;
+        }
     }
-
-    if (cursor_x >= 800) {
-        cursor_x = 0;
-        cursor_y += 16;
-    }
-    if (cursor_y >= 600) {
+    if (cursor_y >= 600 - char_height) {
         terminal_clear();
     }
 }

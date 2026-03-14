@@ -5,6 +5,12 @@
 #include "../include/mouse.h"
 #include "../include/pmm.h"
 #include "../include/paging.h"
+#include "../include/idt.h"
+#include "../include/pic.h"
+#include "../include/timer.h"
+#include "../include/gdt.h"
+
+extern void isr32();
 
 void kmain(uint32_t magic, multiboot_info_t* mbd) {
     if (magic != 0x2BADB002) {
@@ -16,6 +22,11 @@ void kmain(uint32_t magic, multiboot_info_t* mbd) {
     init_paging((uint32_t)mbd->framebuffer_addr);
     terminal_init();
     mouse_init();
+    init_gdt();
+    init_idt();                
+    pic_remap();                                   
+    idt_set_gate(32, (uint32_t)isr32, 0x08, 0x8E); 
+    __asm__ volatile ("sti");
     draw_rect(0, 0, 800, 20, 0x00333333);
     draw_icon(770, 2, 0x0000FF00);
     int32_t old_mx = mouse_x;

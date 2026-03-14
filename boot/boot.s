@@ -33,3 +33,12 @@ _start:
     push eax
     call kmain      ; jump to the C code
     hlt             ; halt the CPU if the C code finishes
+
+global isr32
+extern timer_handler
+
+isr32:
+    pusha             ; save all general-purpose registers
+    call timer_handler ; jump to our C code
+    popa              ; restore all registers perfectly
+    iretd             ; special 'Interrupt Return' instruction
